@@ -2,6 +2,22 @@
 // (c) 2019,2020 by the authors, see AUTHORS file in toplevel directory.
 // Licensed under the GPL v3 (or later), see LICENSE file in toplevel directory.
 
+
+//    lotWebConf by Balazs Kelemen Vers. 3.2.1 (https://github.com/prampec/IotWebConf/blob/master/doc/MigrationGuide-v3.0.0.md)
+//    NimBLE-Arduino by h2zero Vers. 1.4.1
+//    U8g2 by oliver olikraus Vers. 2.34.22
+//    Adafruit Unified Sensor by Adafruit Vers: 1.1.14
+//    Adafruit BME280 Library by Adafruit Vers. 2.2.4
+//    Adafruit BME680 Library by Adafruit vers. 2.0.4
+//    I2CDevice Adafruit_BusIO in Version 1.16.1
+//    lmic MCCI_LoRaWAN_LMIC_library 4.1.1
+//
+//    Edit Boradmanager, plattfomt.txt and add -std=gnu11 when lotWebConf drop error
+//      |   PrimitiveBuilder<ValueType, ParamType>(const char* id) :
+//      |                                          ^~~~~
+//    compiler.c.flags=-c -g -Os {compiler.warning_flags} -std=gnu17  .......
+//    compiler.cpp.flags=-c -g -Os {compiler.warning_flags} -std=gnu++17 .......
+
 #include <Arduino.h>
 
 #include "version.h"
@@ -18,6 +34,8 @@
 #include "ble.h"
 #include "chkhardware.h"
 #include "clock.h"
+
+#define BAND 866E6 
 
 // Measurement interval (default 2.5min) [sec]
 #define MEASUREMENT_INTERVAL 150
@@ -41,6 +59,10 @@ static Switches switches;
 
 void setup() {
   bool isLoraBoard = init_hwtest();
+  #if !SEND2LORA
+  isLoraBoard = false;
+  #endif
+  
   setup_log(DEFAULT_LOG_LEVEL);
   setup_display(isLoraBoard);
   setup_switches(isLoraBoard);

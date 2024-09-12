@@ -34,6 +34,9 @@
 
 // Pins for LORA chip SPI interface come from board file, we need some
 // additional definitions for LMIC
+#ifndef RST_LoRa
+#define RST_LoRa HalPinmap_t::UNUSED_PIN
+#endif
 #define LORA_IRQ DIO0
 #define LORA_IO1 DIO1
 #define LORA_IO2 DIO2

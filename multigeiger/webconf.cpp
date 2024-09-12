@@ -5,6 +5,7 @@
 #include "speaker.h"
 
 #include "IotWebConf.h"
+//#include <IotWebConfUsing.h>
 #include "IotWebConfTParameter.h"
 #include <IotWebConfESP32HTTPUpdateServer.h>
 #include "userdefines.h"
@@ -59,6 +60,13 @@ iotwebconf::TextParameter appkeyParam = iotwebconf::TextParameter("APPKEY", "app
 
 iotwebconf::ParameterGroup grpAlarm = iotwebconf::ParameterGroup("alarm", "Local Alarm Setting");
 iotwebconf::CheckboxParameter soundLocalAlarmParam = iotwebconf::CheckboxParameter("Enable local alarm sound", "soundLocalAlarm", soundLocalAlarm_c, CHECKBOX_LEN, soundLocalAlarm);
+
+//    Edit Boradmanager, plattfomt.txt and add -std=gnu17 when lotWebConf drop error
+//      |   PrimitiveBuilder<ValueType, ParamType>(const char* id) :
+//      |                                          ^~~~~
+//    compiler.c.flags=-c -g -Os {compiler.warning_flags} -std=gnu17  .......
+//    compiler.cpp.flags=-c -g -Os {compiler.warning_flags} -std=gnu++17 .......
+
 iotwebconf::FloatTParameter localAlarmThresholdParam =
   iotwebconf::Builder<iotwebconf::FloatTParameter>("localAlarmThreshold").
   label("Local alarm threshold (µSv/h)").

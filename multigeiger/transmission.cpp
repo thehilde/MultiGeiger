@@ -10,7 +10,9 @@
 #include "display.h"
 #include "userdefines.h"
 #include "webconf.h"
+#if SEND2LORA
 #include "loraWan.h"
+#endif
 
 #include "transmission.h"
 
@@ -50,12 +52,14 @@ void setup_transmission(const char *version, char *ssid, bool loraHardware) {
 
   http_software_version = String(version);
 
+  #if SEND2LORA
   if (isLoraBoard) {
     int major, minor, patch;
     sscanf(version, "V%d.%d.%d", &major, &minor, &patch);
     lora_software_version = (major << 12) + (minor << 4) + patch;
     setup_lorawan();
   }
+  #endif
 
   c_madavi.wc = new WiFiClientSecure;
   c_madavi.wc->setCACert(ca_certs);
@@ -75,6 +79,7 @@ void setup_transmission(const char *version, char *ssid, bool loraHardware) {
 }
 
 void poll_transmission() {
+  #if SEND2LORA
   if (isLoraBoard) {
     // The LMIC needs to be polled a lot; and this is very low cost if the LMIC isn't
     // active. So we just act as a bridge. We need this routine so we can see
@@ -82,6 +87,7 @@ void poll_transmission() {
     // to a jump.
     poll_lorawan();
   }
+  #endif
 }
 
 void prepare_http(HttpsClient *client, const char *host) {
@@ -216,6 +222,7 @@ int send_http_thp_2_madavi(HttpsClient *client, float temperature, float humidit
 // The payload will be translated via http integration and a small program to be compatible with sensor.community.
 // For byte definitions see ttn2luft.pdf in docs directory.
 int send_ttn_geiger(int tube_nbr, unsigned int dt, unsigned int gm_counts) {
+  #if SEND2LORA
   unsigned char ttnData[10];
   // first the number of GM counts
   ttnData[0] = (gm_counts >> 24) & 0xFF;
@@ -232,9 +239,13 @@ int send_ttn_geiger(int tube_nbr, unsigned int dt, unsigned int gm_counts) {
   // next byte is the tube number
   ttnData[9] = tube_nbr;
   return lorawan_send(1, ttnData, 10, false, NULL, NULL, NULL);
+  #else
+  return true;
+  #endif
 }
 
 int send_ttn_thp(float temperature, float humidity, float pressure) {
+  #if SEND2LORA
   unsigned char ttnData[5];
   ttnData[0] = ((int)(temperature * 10)) >> 8;
   ttnData[1] = ((int)(temperature * 10)) & 0xFF;
@@ -242,6 +253,9 @@ int send_ttn_thp(float temperature, float humidity, float pressure) {
   ttnData[3] = ((int)(pressure / 10)) >> 8;
   ttnData[4] = ((int)(pressure / 10)) & 0xFF;
   return lorawan_send(2, ttnData, 5, false, NULL, NULL, NULL);
+  #else
+  return true;
+  #endif
 }
 
 void transmit_data(String tube_type, int tube_nbr, unsigned int dt, unsigned int hv_pulses, unsigned int gm_counts, unsigned int cpm,
@@ -285,6 +299,7 @@ void transmit_data(String tube_type, int tube_nbr, unsigned int dt, unsigned int
     display_status();
   }
 
+  #if SEND2LORA
   if(isLoraBoard && sendToLora && (strcmp(appeui, "") != 0)) {    // send only, if we have LoRa credentials
     bool ttn_ok;
     log(INFO, "Sending to TTN ...");
@@ -296,5 +311,5 @@ void transmit_data(String tube_type, int tube_nbr, unsigned int dt, unsigned int
     set_status(STATUS_TTN, ttn_ok ? ST_TTN_IDLE : ST_TTN_ERROR);
     display_status();
   }
+  #endif
 }
-

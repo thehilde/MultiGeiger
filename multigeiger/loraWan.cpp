@@ -1,5 +1,6 @@
 #include "userdefines.h"
 
+#if SEND2LORA
 // Compile this only if we have a LoRa capable hardware
 
 // loraWan hardware related code
@@ -264,3 +265,4 @@ transmissionStatus_t lorawan_send(uint8_t txPort, uint8_t *txBuffer, uint8_t txS
     }
   }
 }
+#endif
